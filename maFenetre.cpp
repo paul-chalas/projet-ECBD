@@ -74,6 +74,11 @@ void MaFenetre::predire()
 {
     cout << "prédiction !" << endl;
 
+    if (m_fievre->currentText().toStdString() == "NULL" && m_douleur->currentText().toStdString() == "NULL" && m_toux->currentText().toStdString() == "NULL"){
+        m_lpredire->setText("Impossible de savoir :'(");
+        return;
+    }
+
     QStringList maladies;
     for (unsigned j = 0; j < m_mat.size(); j++)
         maladies.append(QString::fromUtf8((m_mat[j][3].c_str())));
