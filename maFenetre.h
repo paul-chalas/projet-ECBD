@@ -22,8 +22,8 @@ public slots :
 public :
     MaFenetre(QWidget *parent = 0);
     void initComboBox(int i, QComboBox* box);
-    int determinerFreq(string maladie);
-    int determinerConf();
+    float determinerFreq(string maladie);
+    float determinerConf(string maladie);
 private :
     QLabel *m_lnom, *m_lprenom, *m_lab, *m_lpredire;
     QPushButton *m_bou, *m_predire;

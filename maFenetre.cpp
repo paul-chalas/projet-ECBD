@@ -12,7 +12,11 @@ MaFenetre::MaFenetre(QWidget *parent) : QMainWindow(parent)
     m_bou = new QPushButton("Quitter", this);
     m_bou->setGeometry(670,200,80,40);
 
-    read_csv (m_mat, m_vet, "/home/c16024036/build-tp_ecbd-Desktop-Debug/data.csv");
+    read_csv (m_mat, m_vet, "/home/c16024036/Téléchargements/build-tp_ecbd-Desktop-Debug/data.csv");
+
+    m_fievre = new QComboBox(this);
+    m_douleur = new QComboBox(this);
+    m_toux = new QComboBox(this);
 
     initComboBox(0, m_fievre);
     initComboBox(1, m_douleur);
@@ -75,27 +79,29 @@ void MaFenetre::predire()
         maladies.append(QString::fromUtf8((m_mat[j][3].c_str())));
     maladies.removeDuplicates();
 
-    vector<int> scores;
+    vector<float> scores;
 
-    //int bob = determinerFreq("Appendicite");
-
-    /*for (int i = 0; i < maladies.size(); ++i){
+    for (int i = 0; i < maladies.size(); ++i){
         scores.push_back(determinerFreq(maladies.at(i).toStdString()));
-    }*/
+    }
 
-    int freq = 0;
-
-    //m_lpredire->setText(QString::number(freq));
-
+    float maxScore = 0;
+    int indice = 0;
+    for (unsigned i = 0; i < scores.size() ; ++i){
+        if (scores[i] > maxScore){
+            maxScore = scores[i];
+            indice = i;
+        }
+    }
+    if (maxScore == 0){
+        m_lpredire->setText("Impossible de savoir :'(");
+    } else {
+        m_lpredire->setText(maladies.at(indice));
+    }
 
 }
 
-int MaFenetre::determinerConf()
-{
-    m_lpredire->setText("bob");
-}
-
-int MaFenetre::determinerFreq(string maladie)
+float MaFenetre::determinerFreq(string maladie)
 {
     float freq = 0;
     for (unsigned i = 0; i < m_mat.size(); i++){
@@ -104,42 +110,51 @@ int MaFenetre::determinerFreq(string maladie)
         }
     }
 
-
     float freqFievre = 0;
     float freqDouleur = 0;
     float freqToux = 0;
 
 
-    //cout << m_douleur->currentText().toStdString() << endl;
-
-    for (unsigned i = 0; i < m_mat.size(); i++){
-        cout << m_mat[i][3] << endl;
-        if (m_mat[i][3] == maladie){
-            freqFievre++;
+    if (m_fievre->currentText().toStdString() == "NULL"){
+        freqFievre = 1;
+    } else{
+        for (unsigned i = 0; i < m_mat.size(); i++){
+            if (m_mat[i][3] == maladie && m_mat[i][0] == m_fievre->currentText().toStdString()){
+                freqFievre++;
+            }
         }
-    }
-    for (unsigned i = 0; i < m_mat.size(); i++){
-        cout << m_mat[i][3] << endl;
-        if (m_mat[i][3] == maladie && m_mat[i][1] == m_douleur->currentText().toStdString()){
-            freqDouleur++;
-        }
-    }
-    for (unsigned i = 0; i < m_mat.size(); i++){
-        cout << m_mat[i][3] << endl;
-        if (m_mat[i][3] == maladie && m_mat[i][2] == m_toux->currentText().toStdString()){
-            freqToux++;
-        }
+        freqFievre = freqFievre/freq;
     }
 
-    freqFievre = freqFievre/freq * 100;
-    freqDouleur = freqDouleur/freq * 100;
-    freqToux = freqToux/freq * 100;
-    freq = freq/m_mat.size() * 100;
+    if (m_douleur->currentText().toStdString() == "NULL"){
+        freqDouleur = 1;
+    } else{
+        for (unsigned i = 0; i < m_mat.size(); i++){
+            if (m_mat[i][3] == maladie && m_mat[i][1] == m_douleur->currentText().toStdString()){
+                freqDouleur++;
+            }
+        }
+        freqDouleur = freqDouleur/freq;
+    }
 
-    cout << freq << endl;
+    if (m_toux->currentText().toStdString() == "NULL"){
+        freqToux = 1;
+    } else{
+        for (unsigned i = 0; i < m_mat.size(); i++){
+            if (m_mat[i][3] == maladie && m_mat[i][2] == m_toux->currentText().toStdString()){
+                freqToux++;
+            }
+        }
+        freqToux = freqToux/freq;
+    }
+
+    freq = freq/m_mat.size();
+
     float score = freq * freqFievre * freqDouleur * freqToux;
 
-    return (int)score;
+    cout << "Score de " << maladie << " : " << score << endl;
+
+    return (score);
 }
 
 
@@ -150,7 +165,6 @@ void MaFenetre::initComboBox(int i, QComboBox* box)
     m_lab->setFont(QFont("Arial",12,QFont::Bold,true));
     m_lab->move(320 + (100*i),125);
 
-    box = new QComboBox(this);
     box->setGeometry(300 + (100*i),150,100,30);
     QStringList tmp;
     for (unsigned j = 0; j < m_mat.size(); j++)
@@ -158,5 +172,4 @@ void MaFenetre::initComboBox(int i, QComboBox* box)
     tmp.removeDuplicates();
     box->addItem("NULL");
     box->addItems(tmp);
-    //m_lpredire->setText(box->currentText());
 }
